@@ -1,0 +1,19 @@
+{
+  "LISTEN_ADDR": "127.0.0.1:3457",
+  "UPSTREAM_BASE_URL": "https://codebuff.com",
+  "AUTH_TOKENS": ["cb_xxx", "cb_yyy"],
+  "ROTATION_INTERVAL": "6h",
+  "REQUEST_TIMEOUT": "15m",
+  "SESSION_CALL_TIMEOUT": "30s",
+  "REGISTRY_REFRESH": "6h",
+  "API_KEYS": [],
+  "ADMIN_TOKEN": "",
+  "HTTP_PROXY": "",
+  "SOCKS5_PROXY": "",
+  "COST_MODE": "free",
+  "DEBUG_DUMP": false,
+  "LOG_FILE": "",
+  "MAX_MESSAGES_PER_DAY": 0,
+  "IDLE_ROTATION_TIMEOUT": "0",
+  "TRANSIENT_RETRIES": 1
+}

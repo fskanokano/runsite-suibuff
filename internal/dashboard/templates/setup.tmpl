@@ -1,0 +1,108 @@
+{{define "setup"}}
+<section class="page-head">
+  <div>
+    <h1>Client setup</h1>
+    <p class="muted">three steps from zero to a working client</p>
+  </div>
+  <div class="pills">
+    <span class="pill mono">{{.BaseURL}}</span>
+    <span class="pill pill-{{if .Bridge}}bridge{{else if eq .Mode "hybrid"}}hybrid{{else}}pool{{end}}">{{.Mode}}</span>
+  </div>
+</section>
+
+{{if .Bridge}}
+<article class="card step-card">
+  <h2><span class="step">1</span> Add your token (switches to pooled mode)</h2>
+  <p class="muted">The proxy currently relays whatever token clients send (bridge mode). Paste a FreeBuff token to run a pooled relay with tracking — added live, no restart.</p>
+  <form hx-post="/admin/tokens/add" hx-target="#setup-result" hx-swap="innerHTML" class="smoke-form">
+    <label for="wiz-token" class="visually-hidden">Token</label>
+    <input type="text" id="wiz-token" name="token" placeholder="cb_..." autocomplete="off" spellcheck="false" class="mono">
+    <button type="submit">Add token</button>
+  </form>
+  <div id="setup-result"></div>
+</article>
+{{else}}
+<article class="card step-card">
+  <h2><span class="step">1</span> Tokens — {{.TokenCount}} in the pool</h2>
+  <p class="muted">Add more, remove the last, or switch back to bridge mode.</p>
+  <form hx-post="/admin/tokens/add" hx-target="#setup-result" hx-swap="innerHTML" class="smoke-form">
+    <label for="wiz-token" class="visually-hidden">Token</label>
+    <input type="text" id="wiz-token" name="token" placeholder="cb_..." autocomplete="off" spellcheck="false" class="mono">
+    <button type="submit">Add token</button>
+  </form>
+  <div class="token-actions-bar">
+    <button class="action-btn" hx-post="/admin/tokens/remove" hx-confirm="Remove the last token?" hx-target="#setup-result" hx-swap="innerHTML">Remove last</button>
+    <button class="action-btn" hx-post="/admin/tokens/test-all" hx-target="#setup-result" hx-swap="innerHTML">Test all</button>
+    <button class="action-btn" hx-post="/admin/mode" hx-vals='{"mode":"bridge"}' hx-confirm="Switch to bridge mode? Pooled tokens are removed." hx-target="#setup-result" hx-swap="innerHTML">Switch to bridge</button>
+  </div>
+  <div id="setup-result"></div>
+</article>
+{{end}}
+
+<article class="card step-card">
+  <h2><span class="step">2</span> Verify it works</h2>
+  <p class="muted">Smoke test — one real chat through the proxy.</p>
+  <form hx-post="/admin/smoke" hx-target="#setup-smoke" hx-swap="innerHTML" class="smoke-form">
+    <select name="model" aria-label="Model">
+      {{range .Models}}<option value="{{.}}">{{.}}</option>{{end}}
+    </select>
+    <input type="text" name="prompt" value="ping" maxlength="200" placeholder="prompt">
+    <button type="submit">Run test</button>
+  </form>
+  <div id="setup-smoke"></div>
+  <div class="token-actions-bar">
+    <button class="action-btn" hx-post="/admin/diag" hx-target="#setup-diag" hx-swap="innerHTML">Full diagnostics</button>
+  </div>
+  <div id="setup-diag"></div>
+</article>
+
+<article class="card step-card">
+  <h2><span class="step">3</span> Connect your client</h2>
+  <p class="muted">Key: <strong>{{.KeyHint}}</strong></p>
+  <div class="setup-grid">
+    <div class="setup-snippet">
+      <h3>OpenCode</h3>
+      <pre class="mono">"freebuff": {"type": "openai", "options": {"baseURL": "{{.BaseURL}}", "apiKey": "not-needed"}}</pre>
+    </div>
+    <div class="setup-snippet">
+      <h3>Continue</h3>
+      <pre class="mono">models:
+  - title: "FreeBuff"
+    provider: "openai"
+    model: "{{.Model}}"
+    apiBase: "{{.BaseURL}}"
+    apiKey: "not-needed"</pre>
+    </div>
+    <div class="setup-snippet">
+      <h3>aider</h3>
+      <pre class="mono">openai-api-base: {{.BaseURL}}
+openai-api-key: not-needed
+model: {{.Model}}</pre>
+    </div>
+    <div class="setup-snippet">
+      <h3>9router</h3>
+      <pre class="mono">Name:    freebuff
+Prefix:  freebuff
+API type: Chat Completions
+Base URL: {{.BaseURL}}
+Model ID: {{.Model}}</pre>
+    </div>
+    <div class="setup-snippet">
+      <h3>curl</h3>
+      <pre class="mono">curl -N {{.BaseURL}}/chat/completions \
+  -H "Authorization: Bearer &lt;token-or-key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"{{.Model}}","messages":[{"role":"user","content":"hi"}],"stream":true}'</pre>
+    </div>
+  </div>
+</article>
+
+{{if .Models}}
+<section class="card models-card">
+  <h2>Catalog ({{len .Models}} models)</h2>
+  <div class="model-chips">
+  {{range .Models}}<span class="pill mono">{{.}}</span>{{end}}
+  </div>
+</section>
+{{end}}
+{{end}}

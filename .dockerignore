@@ -1,0 +1,49 @@
+# ── VCS ──
+.git
+
+# ── third-party reference clones (dev only; shallow clones, ~253MB) ──
+reference/
+
+# ── local secrets / credentials ──
+.env
+.env.local
+.env.*
+!.env.example
+!.env.full-example
+config.json
+config.*.json
+!config.example.json
+*.pem
+*.key
+
+# ── runtime artifacts ──
+dump/
+*.log
+
+# ── build outputs / dev binaries ──
+dist/
+out/
+bin/
+tmp/
+freebuff-proxy
+freebuff-proxy.exe
+*.test
+*.out
+coverage.out
+coverage.html
+*.prof
+
+# ── caches / editor / OS cruft ──
+.ruff_cache/
+node_modules/
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ── local-only docs (gitignored, not repo content); public guides stay ──
+docs/*
+!docs/guides/
+HANDOFF.md
+*.handoff.md

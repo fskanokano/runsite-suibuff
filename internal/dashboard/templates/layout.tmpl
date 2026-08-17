@@ -1,0 +1,44 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#11131a">
+<meta name="htmx-config" content='{"selfRequestsOnly":true,"allowScriptTags":false}'>
+<title>freebuff-proxy · admin</title>
+<link rel="stylesheet" href="/admin/assets/pico.min.css">
+<link rel="stylesheet" href="/admin/assets/app.css">
+<script src="/admin/assets/htmx.min.js" defer></script>
+</head>
+<body>
+<header class="site">
+  <nav class="container">
+    <ul>
+      <li><a href="/admin" class="brand">freebuff-proxy <span class="brand-sub">admin</span></a></li>
+    </ul>
+    <ul>
+      <li><a href="/admin" class="nav-link">Overview</a></li>
+      <li><a href="/admin/tokens" class="nav-link">Tokens</a></li>
+      <li><a href="/admin/models" class="nav-link">Models</a></li>
+      <li><a href="/admin/traces" class="nav-link">Traces</a></li>
+      <li><a href="/admin/config" class="nav-link">Config</a></li>
+      <li><a href="/admin/setup" class="nav-link">Setup</a></li>
+      <li><a href="/admin/logs" class="nav-link">Logs</a></li>
+      <li><a href="/admin/metrics" class="nav-link">Metrics</a></li>
+    </ul>
+  </nav>
+</header>
+<main class="container">
+  <div id="{{.Page}}-root">{{.Body}}</div>
+</main>
+{{if eq .Page "overview"}}<div hx-get="/admin" hx-trigger="every 5s" hx-target="#overview-root" hx-swap="innerHTML" hidden></div>{{end}}
+{{if eq .Page "tokens"}}<div hx-get="/admin/tokens" hx-trigger="every 30s" hx-target="#tokens-root" hx-swap="innerHTML" hidden></div>{{end}}
+{{if eq .Page "logs"}}<div hx-get="/admin/logs" hx-trigger="every 3s" hx-target="#logs-root" hx-swap="innerHTML" hidden></div>{{end}}
+{{if eq .Page "traces"}}<div hx-get="/admin/traces" hx-trigger="every 3s" hx-target="#traces-root" hx-swap="innerHTML" hidden></div>{{end}}
+{{if eq .Page "metrics"}}<div hx-get="/admin/metrics" hx-trigger="every 5s" hx-target="#metrics-root" hx-swap="innerHTML" hidden></div>{{end}}
+<footer class="container muted">
+  <p>single binary · htmx driven · <a href="/healthz">healthz</a> · <a href="/metrics">metrics</a></p>
+</footer>
+</body>
+</html>
+{{end}}

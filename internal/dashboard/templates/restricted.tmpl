@@ -1,0 +1,9 @@
+{{define "restricted"}}
+<section class="login">
+  <article class="card login-card">
+    <h1>Restricted</h1>
+    <p class="muted">{{.Error}}</p>
+    <p class="muted">Set <code>ADMIN_TOKEN</code> in the proxy's <code>.env</code> and restart to access this page from your browser.</p>
+  </article>
+</section>
+{{end}}

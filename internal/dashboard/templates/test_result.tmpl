@@ -1,0 +1,3 @@
+{{define "test_result"}}
+<p class="result {{if .OK}}result-ok{{else}}result-err{{end}}" role="status">Token {{.Token}}: {{.Message}}{{if .InstanceID}} <span class="mono">({{.InstanceID}})</span>{{end}}</p>
+{{end}}

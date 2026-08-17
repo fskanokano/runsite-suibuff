@@ -1,0 +1,27 @@
+# golangci-lint configuration (v2 schema).
+# Docs: https://golangci-lint.run
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - "-ST1000" # exported symbols need doc comments — too noisy for this repo
+        - "-ST1003" # naming style — gofmt/vet cover what matters
+        - "-ST1005" # error strings capitalization
+        - "-ST1016" # method names
+
+formatters:
+  enable:
+    - gofmt

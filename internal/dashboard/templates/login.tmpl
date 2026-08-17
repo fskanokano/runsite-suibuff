@@ -1,0 +1,14 @@
+{{define "login"}}
+<section class="login">
+  <article class="card login-card">
+    <h1>freebuff-proxy admin</h1>
+    <p class="muted">Sign in with the <code>ADMIN_TOKEN</code> configured for this proxy.</p>
+    {{if .Error}}<p class="form-error" role="alert">{{.Error}}</p>{{end}}
+    <form method="post" action="/admin/login">
+      <label for="token">Admin token</label>
+      <input type="password" id="token" name="token" autocomplete="current-password" required autofocus>
+      <button type="submit">Sign in</button>
+    </form>
+  </article>
+</section>
+{{end}}

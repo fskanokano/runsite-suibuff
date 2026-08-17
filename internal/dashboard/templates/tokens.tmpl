@@ -1,0 +1,107 @@
+{{define "tokens"}}
+<section class="page-head">
+  <div>
+    <h1>Tokens</h1>
+    <p class="muted">live per-token session state and per-model quota</p>
+  </div>
+  <div class="pills">
+    <span class="pill pill-{{if .InBridge}}bridge{{else if eq .Mode "hybrid"}}hybrid{{else}}pool{{end}}">{{.Mode}}</span>
+    {{if .InBridge}}<span class="pill">{{.BridgeTokens}} bridge client{{if ne .BridgeTokens 1}}s{{end}}</span>{{end}}
+  </div>
+</section>
+
+{{if .InBridge}}
+<article class="card bridge-card">
+  <h2>Bridge mode</h2>
+  <p>Upstream tokens are relayed per client request ({{.BridgeTokens}} active bridge client{{if ne .BridgeTokens 1}}s{{end}}); session state and quota are per-client and are not tracked here.</p>
+  <p class="muted">Paste a FreeBuff token below to switch to pooled mode — it is added live and persisted to <code>.env</code>.</p>
+</article>
+{{else if not .HasTokens}}
+<article class="card empty-card">
+  <h2>No tokens configured</h2>
+  <p>Paste a FreeBuff token below to start the pooled relay.</p>
+</article>
+{{else}}
+<article class="card mode-card">
+  <h2>{{if eq .Mode "hybrid"}}Hybrid mode{{else}}Pooled mode{{end}} — {{.TokenCount}} token(s)</h2>
+  {{if eq .Mode "hybrid"}}<p class="muted">Hybrid: a client-supplied token is relayed like bridge; token-less requests use the pooled tokens below.</p>{{end}}
+  <p class="muted">Tokens below are live: Test/Unlock/Finish act on them immediately, and the pool persists changes to <code>.env</code> (no restart needed).</p>
+  <div class="token-actions-bar">
+    <button class="action-btn" hx-post="/admin/tokens/remove" hx-confirm="Remove the last token from the pool and .env?" hx-target="#token-result" hx-swap="innerHTML">Remove last token</button>
+    <button class="action-btn" hx-post="/admin/mode" hx-vals='{"mode":"hybrid"}' hx-confirm="Switch to hybrid mode? Pooled tokens stay; clients with a token relay it, token-less requests use the pool." hx-target="#token-result" hx-swap="innerHTML">Switch to hybrid mode</button>
+    <button class="action-btn" hx-post="/admin/mode" hx-vals='{"mode":"bridge"}' hx-confirm="Switch to bridge mode? All pooled tokens are removed (clients then send their own token)." hx-target="#token-result" hx-swap="innerHTML">Switch to bridge mode</button>
+  </div>
+</article>
+{{end}}
+
+<article class="card add-token-card">
+  <h2>Add token</h2>
+  <p class="muted">Paste a FreeBuff token (<code>cb_...</code>) — added to the live pool and persisted.</p>
+  <form hx-post="/admin/tokens/add" hx-target="#token-result" hx-swap="innerHTML" class="smoke-form">
+    <label for="new-token" class="visually-hidden">Token</label>
+    <input type="text" id="new-token" name="token" placeholder="cb_..." autocomplete="off" spellcheck="false" class="mono">
+    <button type="submit">Add</button>
+  </form>
+</article>
+
+<p class="muted manage-note">Advanced: <code>AUTH_TOKENS</code> can also be edited raw in <a href="/admin/config">Config</a>.</p>
+<div class="token-actions-bar">
+  {{if not .InBridge}}<button class="action-btn" hx-post="/admin/tokens/test-all" hx-target="#token-result" hx-swap="innerHTML">Test all tokens</button>{{end}}
+</div>
+<div id="token-result"></div>
+{{range .Tokens}}
+<article class="card token-detail">
+  <header class="token-head">
+    <span class="state-dot dot-{{.RiskLevel}}"></span>
+    <strong class="token-name">Token {{.Index}}</strong>
+    <span class="pill risk-{{.RiskLevel}}">{{.RiskLevel}}</span>
+    <span class="pill">{{.SessionStatus}}</span>
+    <span class="token-actions">
+      {{if .CooldownActive}}<button class="action-btn" hx-post="/admin/tokens/{{.Index}}/unlock" hx-confirm="Unlock Token {{.Index}}? Only do this if you know the cooldown/ban is stale — upstream locks are usually correct." hx-target="#token-result" hx-swap="innerHTML">Unlock</button>{{end}}
+      <button class="action-btn" hx-post="/admin/tokens/{{.Index}}/test" hx-target="#token-result" hx-swap="innerHTML">Test</button>
+      <button class="action-btn" hx-post="/admin/tokens/{{.Index}}/finish" hx-confirm="Finish all active runs of Token {{.Index}}? In-flight requests are unaffected." hx-target="#token-result" hx-swap="innerHTML">Finish runs</button>
+    </span>
+  </header>
+  <dl class="kv kv-4">
+    <div><dt>session id</dt><dd class="mono">{{.SessionInstance}}</dd></div>
+    <div><dt>active runs</dt><dd class="mono">{{.ActiveRuns}}</dd></div>
+    <div><dt>requests</dt><dd class="mono">{{.Requests}}</dd></div>
+    <div><dt>messages 24h</dt><dd class="mono">{{.Messages24h}}{{if gt .DailyLimit 0}} / {{.DailyLimit}}{{end}}</dd></div>
+    {{if gt .QueueDepth 0}}<div><dt>queue</dt><dd class="mono">{{.QueuePosition}}/{{.QueueDepth}}</dd></div>{{end}}
+    {{if .CooldownActive}}<div><dt>cooldown until</dt><dd class="mono">{{.CooldownUntil}}</dd></div>{{end}}
+    {{if gt .TransientRetries 0}}<div><dt>transient retries</dt><dd class="mono">{{.TransientRetries}}</dd></div>{{end}}
+  </dl>
+  {{if gt .DailyLimit 0}}
+  <div class="usage"><div class="usage-bar" style="width: {{.UsagePct}}%"></div></div>
+  <p class="muted usage-label">{{.UsagePct}}% of daily limit</p>
+  {{end}}
+  {{if .HasQuota}}
+  <h3 class="quota-heading">Session quota by model</h3>
+  <div class="table-wrap">
+    <table class="quota-table">
+      <thead>
+        <tr><th scope="col">model</th><th scope="col">recent</th><th scope="col">limit</th><th scope="col">period</th><th scope="col">reset</th><th scope="col">entitlement</th></tr>
+      </thead>
+      <tbody>
+      {{range .Quota}}
+        <tr>
+          <td class="mono">{{.Model}}</td>
+          <td class="mono">{{.Recent}}</td>
+          <td class="mono">{{.Limit}}</td>
+          <td class="mono">{{.Period}}</td>
+          <td class="mono">{{.ResetAt}}{{if .ResetsIn}} <span class="countdown{{if .NearLimit}} countdown-near{{end}}">{{.ResetsIn}}</span>{{end}}</td>
+          <td class="mono">{{if .HasEntitlement}}{{.Entitled}}{{end}}</td>
+        </tr>
+        {{if .HasBar}}
+        <tr class="quota-bar-row">
+          <td colspan="6"><div class="usage {{if .NearLimit}}usage-near{{end}}"><div class="usage-bar" style="width: {{.UsagePct}}%"></div></div></td>
+        </tr>
+        {{end}}
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</article>
+{{end}}
+{{end}}

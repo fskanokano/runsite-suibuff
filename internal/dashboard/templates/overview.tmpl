@@ -1,0 +1,66 @@
+{{define "overview"}}
+<section class="page-head">
+  <div>
+    <h1>Overview</h1>
+    <p class="muted">live relay status — refreshes every 5s</p>
+  </div>
+  <div class="pills">
+    <span class="pill pill-{{if .InBridge}}bridge{{else if eq .Mode "hybrid"}}hybrid{{else}}pool{{end}}">{{.Mode}}</span>
+    <span class="pill">{{.ModelCount}} models</span>
+    <span class="pill">up {{.Uptime}}</span>
+    {{if .SafeMode}}<span class="pill pill-safe">safe mode</span>{{end}}
+  </div>
+</section>
+
+<section class="card smoke-card">
+  <h2>Smoke test</h2>
+  <p class="muted">Send one real chat through the proxy — proves the whole path end to end.</p>
+  <form hx-post="/admin/smoke" hx-target="#smoke-result" hx-swap="innerHTML" class="smoke-form">
+    <label for="smoke-model" class="visually-hidden">Model</label>
+    <select id="smoke-model" name="model">
+      {{range .Models}}<option value="{{.}}">{{.}}</option>{{end}}
+    </select>
+    <label for="smoke-prompt" class="visually-hidden">Prompt</label>
+    <input type="text" id="smoke-prompt" name="prompt" value="ping" maxlength="200" placeholder="prompt">
+    <button type="submit">Run test</button>
+  </form>
+  <div id="smoke-result"></div>
+</section>
+
+{{if .InBridge}}
+<article class="card bridge-card">
+  <h2>Bridge mode</h2>
+  <p>No <code>AUTH_TOKENS</code> configured — upstream tokens are relayed per client request ({{.BridgeTokens}} active bridge client{{if ne .BridgeTokens 1}}s{{end}}). Session state and quota are per-client and not shown here.</p>
+</article>
+{{else if not .HasTokens}}
+<article class="card empty-card">
+  <h2>No tokens configured</h2>
+  <p>Add <code>AUTH_TOKENS</code> in <a href="/admin/config">Config</a> to start the pooled relay.</p>
+</article>
+{{else}}
+<div class="token-grid">
+{{range .Tokens}}
+  <article class="card token-card" data-risk="{{.RiskLevel}}">
+    <header class="token-head">
+      <span class="state-dot dot-{{.RiskLevel}}"></span>
+      <strong class="token-name">Token {{.Index}}</strong>
+      <span class="pill risk-{{.RiskLevel}}">{{.RiskLevel}}</span>
+    </header>
+    <dl class="kv">
+      <div><dt>session</dt><dd class="mono">{{.SessionStatus}}</dd></div>
+      <div><dt>active runs</dt><dd class="mono">{{.ActiveRuns}}</dd></div>
+      <div><dt>requests</dt><dd class="mono">{{.Requests}}</dd></div>
+      <div><dt>messages 24h</dt><dd class="mono">{{.Messages24h}}{{if gt .DailyLimit 0}} / {{.DailyLimit}}{{end}}</dd></div>
+      {{if gt .QueueDepth 0}}<div><dt>queue</dt><dd class="mono">{{.QueuePosition}}/{{.QueueDepth}}</dd></div>{{end}}
+      {{if .CooldownActive}}<div><dt>cooldown until</dt><dd class="mono">{{.CooldownUntil}}</dd></div>{{end}}
+      {{if gt .TransientRetries 0}}<div><dt>transient retries</dt><dd class="mono">{{.TransientRetries}}</dd></div>{{end}}
+    </dl>
+    {{if gt .DailyLimit 0}}
+    <div class="usage"><div class="usage-bar" style="width: {{.UsagePct}}%"></div></div>
+    <p class="muted usage-label">{{.UsagePct}}% of daily limit</p>
+    {{end}}
+  </article>
+{{end}}
+</div>
+{{end}}
+{{end}}

@@ -1,0 +1,46 @@
+{{define "logs"}}
+<section class="page-head">
+  <div>
+    <h1>Logs</h1>
+    <p class="muted">last 200 records from the in-memory ring — refreshes every 3s</p>
+  </div>
+  <div class="pills">
+    <span class="pill">{{if .Enabled}}ring enabled{{else}}ring disabled{{end}}</span>
+  </div>
+</section>
+
+{{if not .Enabled}}
+<article class="card empty-card">
+  <h2>Log viewer disabled</h2>
+  <p>The log ring was not wired (started without the dashboard log handler).</p>
+</article>
+{{else if not .Entries}}
+<article class="card empty-card">
+  <h2>No log records yet</h2>
+  <p>Records appear here as the proxy logs them.</p>
+</article>
+{{else}}
+<div class="table-wrap">
+  <table class="log-table">
+    <thead class="visually-hidden">
+      <tr>
+        <th scope="col">time</th>
+        <th scope="col">level</th>
+        <th scope="col">message</th>
+        <th scope="col">fields</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range .Entries}}
+      <tr class="log-{{.Level}}">
+        <td class="mono log-time">{{.Time}}</td>
+        <td class="mono log-level">{{.Level}}</td>
+        <td class="log-msg">{{.Message}}</td>
+        <td class="mono log-fields">{{.Fields}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+{{end}}

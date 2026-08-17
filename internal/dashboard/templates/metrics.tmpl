@@ -1,0 +1,31 @@
+{{define "metrics"}}
+<section class="page-head">
+  <div>
+    <h1>Metrics</h1>
+    <p class="muted">counter trends sampled every 5s; raw exposition at <a href="/metrics">/metrics</a></p>
+  </div>
+  <div class="pills">
+    <span class="pill">{{.Models}} models</span>
+    <span class="pill">{{.SampleCount}} samples</span>
+  </div>
+</section>
+
+<div class="metric-grid">
+  <article class="card metric-card">
+    <h2>Requests served</h2>
+    <p class="metric-value mono">{{.RequestsTotal}}</p>
+    <div class="sparkline">{{.RequestsSpark}}</div>
+  </article>
+  <article class="card metric-card">
+    <h2>Transient retries</h2>
+    <p class="metric-value mono">{{.TransientRetries}}</p>
+    <div class="sparkline">{{.RetriesSpark}}</div>
+  </article>
+  <article class="card metric-card">
+    <h2>Fingerprint rotations</h2>
+    <p class="metric-value mono">{{.FingerprintRotations}}</p>
+  </article>
+</div>
+
+<p class="muted">Full Prometheus exposition (per-token counters, cooldowns, quota): <a href="/metrics">/metrics</a></p>
+{{end}}

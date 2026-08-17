@@ -1,0 +1,4 @@
+{{define "smoke_result"}}
+<p class="result result-ok" role="status">Smoke test OK — <span class="mono">{{.Model}}</span> via {{.Token}} in {{.Ms}}ms.</p>
+{{if .Preview}}<pre class="smoke-preview mono">{{.Preview}}</pre>{{end}}
+{{end}}

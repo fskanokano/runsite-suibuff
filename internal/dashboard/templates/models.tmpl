@@ -1,0 +1,45 @@
+{{define "models"}}
+<section class="page-head">
+  <div>
+    <h1>Models</h1>
+    <p class="muted">catalog from the live registry (fallback at boot + periodic refresh)</p>
+  </div>
+  <div class="pills">
+    <span class="pill">{{.Count}} models</span>
+    <span class="pill">{{.Agents}} agents</span>
+  </div>
+</section>
+
+<div class="table-wrap">
+  <table class="model-table">
+    <thead>
+      <tr><th scope="col">model id</th><th scope="col">upstream agent</th></tr>
+    </thead>
+    <tbody>
+    {{range .Models}}
+      <tr>
+        <td class="mono">{{.ID}}</td>
+        <td class="mono">{{.Agent}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+
+{{if .HasAliases}}
+<section class="card aliases-card">
+  <h2>Aliases</h2>
+  <p class="muted">MODEL_ALIASES mappings — clients may use the alias instead of the full id.</p>
+  <div class="table-wrap">
+    <table class="model-table">
+      <thead><tr><th scope="col">alias</th><th scope="col">resolves to</th></tr></thead>
+      <tbody>
+      {{range .Aliases}}
+        <tr><td class="mono">{{.Alias}}</td><td class="mono">{{.Real}}</td></tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{end}}
+{{end}}

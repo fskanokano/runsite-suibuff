@@ -1,0 +1,44 @@
+{{define "config"}}
+<section class="page-head">
+  <div>
+    <h1>Config</h1>
+    <p class="muted">edit <code>.env</code> in the proxy working directory — save validates and hot-reloads</p>
+  </div>
+  <div class="pills">
+    <span class="pill">{{if .HasEnvFile}}.env present{{else}}no .env yet{{end}}</span>
+  </div>
+</section>
+
+<div class="config-grid">
+  <article class="card">
+    <h2>Effective configuration</h2>
+    <p class="muted">secrets shown as set/unset + counts; values may come from env vars or the JSON config, which always win over <code>.env</code>.</p>
+    <table class="kv-table">
+      <tbody>
+      {{range .Effective}}
+        <tr>
+          <th scope="row" class="mono">{{.Key}}</th>
+          <td>{{if .Secret}}<span class="secret">{{.Value}}</span>{{else}}<span class="mono">{{.Value}}</span>{{end}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </article>
+
+  <article class="card">
+    <h2>Editor</h2>
+    <form method="post" action="/admin/config" hx-post="/admin/config" hx-target="#config-result" hx-swap="innerHTML">
+      <label for="env-content">.env content</label>
+      <textarea id="env-content" name="content" rows="24" class="mono" spellcheck="false" required>{{.EnvContent}}</textarea>
+      <div class="form-actions">
+        <button type="submit">Save &amp; reload</button>
+      </div>
+    </form>
+    <div id="config-result"></div>
+  </article>
+</div>
+{{end}}
+
+{{define "config_result"}}
+<p class="result {{if .OK}}result-ok{{else}}result-err{{end}}" role="status">{{.Message}}</p>
+{{end}}

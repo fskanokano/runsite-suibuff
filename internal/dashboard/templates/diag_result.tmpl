@@ -1,0 +1,9 @@
+{{define "diag_result"}}
+<div class="diag-list">
+{{range .Checks}}
+  <p class="result {{if .Warn}}result-warn{{else if .OK}}result-ok{{else}}result-err{{end}}" role="status">
+    {{if .OK}}✓{{else if .Warn}}△{{else}}✗{{end}} {{.Message}}
+  </p>
+{{end}}
+</div>
+{{end}}

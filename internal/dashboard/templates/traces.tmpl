@@ -1,0 +1,43 @@
+{{define "traces"}}
+<section class="page-head">
+  <div>
+    <h1>Traces</h1>
+    <p class="muted">recent chat requests and their routing outcome — refreshes every 3s</p>
+  </div>
+  <div class="pills">
+    <span class="pill">{{if .Enabled}}ring enabled{{else}}ring disabled{{end}}</span>
+  </div>
+</section>
+
+{{if not .Enabled}}
+<article class="card empty-card">
+  <h2>Trace viewer disabled</h2>
+  <p>The log ring was not wired (started without the dashboard log handler).</p>
+</article>
+{{else if not .Traces}}
+<article class="card empty-card">
+  <h2>No chat traffic yet</h2>
+  <p>Chat requests appear here as the proxy serves them.</p>
+</article>
+{{else}}
+<div class="table-wrap">
+  <table class="trace-table">
+    <thead>
+      <tr><th scope="col">time</th><th scope="col">token</th><th scope="col">model</th><th scope="col">status</th><th scope="col">ms</th><th scope="col">error</th></tr>
+    </thead>
+    <tbody>
+    {{range .Traces}}
+      <tr class="trace-{{.Status}}{{if .Error}} trace-err{{end}}">
+        <td class="mono trace-time">{{.Time}}</td>
+        <td class="mono">{{.Token}}</td>
+        <td class="mono">{{.Model}}</td>
+        <td class="mono trace-status">{{.Status}}</td>
+        <td class="mono">{{.Ms}}</td>
+        <td class="mono trace-error">{{.Error}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+{{end}}
